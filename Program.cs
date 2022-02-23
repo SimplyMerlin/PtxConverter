@@ -26,34 +26,18 @@ namespace PtxConverter {
                 int hexIn;
                 Boolean swapMode = false;
                 var swapPool = new List<byte>();
-                int nextInPool = 0;
                 for (int i = 0; (hexIn = fs.ReadByte()) != -1; i++){
                     if ((i + (((rowSize / 16) - (widthRounded / 4)) * 16)) % rowSize == 0 && i != 0 && (((rowSize / 16) - (widthRounded / 4)) * 16) != 0) {
                         fs.Seek((((rowSize / 16) - (widthRounded / 4)) * 16 - 1), SeekOrigin.Current);
                         i += (((rowSize / 16) - (widthRounded / 4)) * 16 - 1);
                         continue;
                     }
-                    if (i % 8 == 0 || swapMode) {
+                    if (i % 2 == 0 || swapMode) {
                         swapMode = true;
                         swapPool.Add((byte)hexIn);
-                        nextInPool++;
-                        if (nextInPool >= 8) {
-                            nextInPool = 0;
-                            swapMode = false;
-                            List<byte> swapPoolCopy = new List<byte>(swapPool);
-                            swapPool[0] = swapPoolCopy[1];
-                            swapPool[1] = swapPoolCopy[0];
-                            swapPool[2] = swapPoolCopy[3];
-                            swapPool[3] = swapPoolCopy[2];
-                            swapPool[4] = swapPoolCopy[5];
-                            swapPool[5] = swapPoolCopy[4];
-                            swapPool[6] = swapPoolCopy[7];
-                            swapPool[7] = swapPoolCopy[6];
-
-                            foreach (byte x in swapPool) {
-                                allBytes.Add(x);
-                            }
-
+                        if (swapPool.Count >= 2) {
+                            allBytes.Add(swapPool[1]);
+                            allBytes.Add(swapPool[0]);
                             swapPool.Clear();
                         }
                     } else {
